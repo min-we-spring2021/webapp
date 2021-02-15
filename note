@@ -1,0 +1,2 @@
+mysql -uroot -p123456       //login mysql
+await 必须返回promise  才会等待。
