@@ -6,6 +6,7 @@ const cors = require("cors");
 const app = express();
 const PORT = 5000;
 const db = require("./models");
+db.sequelize.sync();
 const basicAuth = require('./_helpers/basic-auth');
 const errorHandler = require('./_helpers/error-handler');
 
@@ -42,6 +43,7 @@ app.use(errorHandler);
 
 
 const users = db.users;
+const books = db.books;
 const Op = db.Sequelize.Op;
 
 app.get("/", (req, res) => {
@@ -76,7 +78,7 @@ app.post('/v1/user', express.json(), (req, res) => {
             newUser.username = email,
             newUser.account_created = Date.now()
     });
-    //console.log(req.headers.authorization)
+
     isIdUnique(email).then(isUnique => {
         if (isUnique) {
             users.create(newUser)
@@ -95,5 +97,76 @@ app.post('/v1/user', express.json(), (req, res) => {
     });
 
 })
+app.post("/books", express.json(), basicAuth, (req, res) => {
+    const { title, author, isbn, published_date } = req.body;
+    const user_id = req.user.id;
+    const uid = uuidv4();
+    const newBook = {
+        id: uid,
+        title: title,
+        author: author,
+        isbn: isbn,
+        published_date: published_date,
+        user_id: user_id,
+        book_created: Date.now()
+    }
+    console.log(newBook)
+    books.create(newBook).then(data => {
+        res.status(200).json(newBook)
+    })
+        .catch(err => {
+            res.status(500).json({
+                message:
+                    err.message || "Some error occurred while creating the user."
+            });
+        });
+
+});
+app.delete('/books/:id', express.json(), basicAuth, (req, res) => {
+    const id = req.params.id;
+    books.destroy({
+        where: { id: id }
+    })
+        .then(num => {
+            if (num == 1) {
+                res.status(200).send({
+                    message: "The book was deleted successfully!"
+                });
+            } else {
+                res.send({
+                    message: `Cannot delete book with id=${id}. Maybe Tutorial was not found!`
+                });
+            }
+        })
+        .catch(err => {
+            res.status(500).send({
+                message: "Could not delete book with id=" + id
+            });
+        });
+});
+app.get("/books", (req, res) => {
+    books.findAll()
+        .then(data => {
+            res.status(200).send(data);
+        })
+        .catch(err => {
+            res.status(500).send({
+                message:
+                    err.message || "Some error occurred while retrieving books."
+            });
+        });
+});
+app.get("/books/:id", (req, res) => {
+    const id = req.params.id;
+    books.findByPk(id)
+        .then(data => {
+            res.status(200).send(data);
+        })
+        .catch(err => {
+            res.status(500).send({
+                message: "Error retrieving book with id=" + id
+            });
+        });
+});
 
 app.listen(PORT, () => console.log(`listening on http://localhost:${PORT}`));
