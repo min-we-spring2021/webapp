@@ -38,12 +38,7 @@ async function update({ first_name, last_name, password }, { username }, res) {
         account_updated: Date.now()
     };
 
-    //    bcrypt.hash(password, saltRounds, function (err, hash) {
-    //         newUser.first_name = first_name,
-    //             newUser.last_name = last_name,
-    //             newUser.password = hash
-    //         newUser.account_updated = Date.now()
-    //     });
+
 
     users.update(newUser, {
         where: { username: username }
