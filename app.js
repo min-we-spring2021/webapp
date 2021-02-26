@@ -61,23 +61,25 @@ app.put('/v1/user/self', express.json(), (req, res) => {
 
 })
 
-app.post('/v1/user', express.json(), (req, res) => {
+app.post('/v1/user', express.json(), async (req, res) => {
 
     const { first_name, last_name, password, email } = req.body;
+
     const uid = uuidv4();
     if (!validPW(password)) {
         res.status(401).json({ meg: "invalid password" })
         return;
     }
     const newUser = {};
-    bcrypt.hash(password, saltRounds, function (err, hash) {
-        newUser.id = uid,
-            newUser.first_name = first_name,
-            newUser.last_name = last_name,
-            newUser.password = hash,
-            newUser.username = email,
-            newUser.account_created = Date.now()
-    });
+    const hashedPassword = await bcrypt.hash(password, saltRounds)
+    newUser.id = uid,
+        newUser.first_name = first_name,
+        newUser.last_name = last_name,
+        newUser.password = hashedPassword,
+        newUser.username = email,
+        newUser.account_created = Date.now()
+
+
 
     isIdUnique(email).then(isUnique => {
         if (isUnique) {
