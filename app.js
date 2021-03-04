@@ -170,5 +170,14 @@ app.get("/books/:id", (req, res) => {
             });
         });
 });
+app.delete('/books/:book_id/image/:image_id', express.json(), basicAuth, (req, res) => {
+
+
+});
+app.post('/books/:book_id/image', express.json(), basicAuth, (req, res) => {
+
+
+});
+
 
 app.listen(PORT, () => console.log(`listening on http://localhost:${PORT}`));
