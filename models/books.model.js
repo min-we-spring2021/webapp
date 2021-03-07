@@ -1,4 +1,4 @@
-const file = require("./file.model")
+
 module.exports = (sequelize, Sequelize) => {
     const Books = sequelize.define("books", {
         id: {
@@ -32,8 +32,8 @@ module.exports = (sequelize, Sequelize) => {
         user_id: {
             type: Sequelize.STRING,
             noUpdate: true
-        },
-        book_images: [file]
+        }
+
 
     });
 

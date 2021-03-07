@@ -1,8 +1,9 @@
+
 module.exports = {
-    HOST: "localhost",
-    USER: "root",
-    PASSWORD: "123456",
-    DB: "cloudDB",
+    HOST: process.env.HOST || "localhost",
+    USER: process.env.USERNAME || "root",
+    PASSWORD: process.env.PASSWORD || "123456",
+    DB: "csye6225",
     dialect: "mysql",
     pool: {
         max: 5,

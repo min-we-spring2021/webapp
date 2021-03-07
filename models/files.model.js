@@ -1,5 +1,5 @@
 module.exports = (sequelize, Sequelize) => {
-    const Books = sequelize.define("file", {
+    const Files = sequelize.define("files", {
         file_id: {
             type: Sequelize.STRING,
             noUpdate: true,
@@ -19,7 +19,7 @@ module.exports = (sequelize, Sequelize) => {
         },
 
         create_date: {
-            type: Sequelize.DATEONLY,
+            type: Sequelize.DATE,
             allowNull: false,
             noUpdate: true
 
@@ -28,9 +28,13 @@ module.exports = (sequelize, Sequelize) => {
         user_id: {
             type: Sequelize.STRING,
             noUpdate: true
+        },
+        book_id: {
+            type: Sequelize.STRING,
+            noUpdate: true
         }
 
     });
 
-    return file;
+    return Files;
 };
