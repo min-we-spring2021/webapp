@@ -4,6 +4,7 @@ module.exports = {
     USER: process.env.USERNAME || "root",
     PASSWORD: process.env.PASSWORD || "123456",
     DB: "csye6225",
+    PORT: "3306",
     dialect: "mysql",
     pool: {
         max: 5,

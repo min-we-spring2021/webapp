@@ -231,7 +231,6 @@ app.get("/books/:id", async (req, res) => {
                         book_created: book.book_created,
                         user_id: book.user_id,
                         files: book.files.map(file => {
-                            console.log('1')
                             return Object.assign(
                                 {},
                                 {
@@ -264,7 +263,7 @@ app.delete('/books/:book_id/image/:image_id', express.json(), basicAuth, (req, r
     });
     const s3 = new aws.S3();
     const params = {
-        Bucket: process.env.Bucket || "webapp.wenhao.min",
+        Bucket: process.env.Bucket || "webapp-wenhao-min",
         Key: image_id,
     };
 
@@ -318,9 +317,8 @@ app.post('/books/:book_id/image', express.json(), basicAuth, (req, res) => {
         'create_date': new Date(Date.now()).toISOString(),
         "bookId": bookId
     }
-
     const params = {
-        Bucket: process.env.Bucket || "webapp.wenhao.min",
+        Bucket: process.env.Bucket || "webapp-wenhao-min",
         Key: imageId,
         Body: fileContent
     };
