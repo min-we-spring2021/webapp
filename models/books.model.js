@@ -32,9 +32,8 @@ module.exports = (sequelize, Sequelize) => {
         user_id: {
             type: Sequelize.STRING,
             noUpdate: true
-        }
-
-
+        },
+    }, { //underscored: true 
     });
 
     return Books;

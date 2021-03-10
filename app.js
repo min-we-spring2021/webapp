@@ -12,15 +12,18 @@ const db = require("./models");
 db.sequelize.sync();
 const basicAuth = require('./_helpers/basic-auth');
 const errorHandler = require('./_helpers/error-handler');
-const path = require('path');
-const multer = require("multer");
-const multerS3 = require("multer-s3");
-const aws = require("aws-sdk");
-const s3 = new aws.S3();
-//const upload = require('./_helpers/image-upload')
-
+const isIdUnique = require('./_helpers/isIdUnique');
+const validPW = require('./_helpers/validPW');
+const isUniqueFileName = require('./_helpers/isUniqueFileName');
 const fileUpload = require('express-fileupload');
+const path = require('path');
 
+const aws = require("aws-sdk");
+// aws.config.update({
+//     accessKeyId: process.env.accessKeyId,
+//     secretAccessKey: process.env.secretAccessKey
+// });
+const s3 = new aws.S3();
 
 const saltRounds = 10;
 const users = db.users;
@@ -28,60 +31,26 @@ const books = db.books;
 const files = db.files;
 const Op = db.Sequelize.Op;
 
-function isIdUnique(email) {
-    return users.count({ where: { username: email } })
-        .then(count => {
-            if (count != 0) {
-                return false;
-            }
-            return true;
-        });
-}
-function validPW(pw) {
-    const reg = /[a-z]+[0-9]+/;
-    const reg2 = /[0-9]+[a-z]+/;
-    return pw.length > 8 && (reg.test(pw) || reg2.test(pw));
-}
-function isUniqueFileName(name) {
-    return files.count({ where: { file_name: name } })
-        .then(count => {
-            if (count != 0) {
-                return false;
-            }
-            return true;
-        });
-}
-
 
 
 app.use(cors());
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-//app.use(basicAuth);
-//api routes
 app.use('/v1/user/self', require('./users/users.controller'));
-//global error handler
 app.use(errorHandler);
 app.use(fileUpload());
-
-
-
 
 
 app.get("/", (req, res) => {
     res.json({ message: "Welcome to my application." });
 });
-
 app.get("/v1/user/self", express.json(), (req, res) => {
 });
 app.put('/v1/user/self', express.json(), (req, res) => {
 })
-
 app.post('/v1/user', express.json(), async (req, res) => {
-
     const { first_name, last_name, password, email } = req.body;
-
     const uid = uuidv4();
     if (!validPW(password)) {
         res.status(401).json({ meg: "invalid password" })
@@ -112,7 +81,6 @@ app.post('/v1/user', express.json(), async (req, res) => {
             res.status(500).json({ err: "same email exists" })
         }
     });
-
 })
 app.post("/books", express.json(), basicAuth, (req, res) => {
     const { title, author, isbn, published_date } = req.body;
@@ -136,7 +104,6 @@ app.post("/books", express.json(), basicAuth, (req, res) => {
                     err.message || "Some error occurred while creating the user."
             });
         });
-
 });
 app.delete('/books/:id', express.json(), basicAuth, (req, res) => {
     const id = req.params.id;
@@ -161,7 +128,6 @@ app.delete('/books/:id', express.json(), basicAuth, (req, res) => {
         });
 });
 app.get("/books", async (req, res) => {
-
     await books.findAll({
         include: [
             {
@@ -171,7 +137,6 @@ app.get("/books", async (req, res) => {
     })
         .then(books => {
             const resObj = books.map(book => {
-
                 return Object.assign(
                     {},
                     {
@@ -183,7 +148,6 @@ app.get("/books", async (req, res) => {
                         book_created: book.book_created,
                         user_id: book.user_id,
                         files: book.files.map(file => {
-                            console.log('1')
                             return Object.assign(
                                 {},
                                 {
@@ -219,7 +183,6 @@ app.get("/books/:id", async (req, res) => {
     })
         .then(books => {
             const resObj = books.map(book => {
-
                 return Object.assign(
                     {},
                     {
@@ -257,17 +220,10 @@ app.get("/books/:id", async (req, res) => {
 });
 app.delete('/books/:book_id/image/:image_id', express.json(), basicAuth, (req, res) => {
     const image_id = req.params.image_id;
-    aws.config.update({
-        accessKeyId: "AKIATLVUCBQDT6UBLOWL",
-        secretAccessKey: "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"
-    });
-    const s3 = new aws.S3();
     const params = {
         Bucket: process.env.Bucket || "webapp-wenhao-min",
         Key: image_id,
     };
-
-
     files.destroy({
         where: { file_id: image_id }
     })
@@ -280,7 +236,6 @@ app.delete('/books/:book_id/image/:image_id', express.json(), basicAuth, (req, r
                     }
                     res.status(200).send({ message: "The file was deleted successfully!" })
                 })
-
             } else {
                 res.send({
                     message: `Cannot delete file with id=${image_id}. Maybe file was not found!`
@@ -297,11 +252,6 @@ app.post('/books/:book_id/image', express.json(), basicAuth, (req, res) => {
     const bookId = req.params.book_id;
     const user_id = req.user.id;
     const imageId = uuidv4();
-    aws.config.update({
-        accessKeyId: "AKIATLVUCBQDT6UBLOWL",
-        secretAccessKey: "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"
-    });
-    const s3 = new aws.S3();
     const length = Object.keys(req.files).length;
     if (length != 1) {
         res.status(401).send({ message: "you should upload a file each time" });
@@ -344,8 +294,6 @@ app.post('/books/:book_id/image', express.json(), basicAuth, (req, res) => {
             res.status(500).json({ err: "same file name exists" })
         }
     });
-
 });
-
 
 app.listen(PORT, () => console.log(`listening on http://localhost:${PORT}`));

@@ -34,6 +34,7 @@ module.exports = (sequelize, Sequelize) => {
             noUpdate: true
         }
 
+    }, { //underscored: true
     });
 
     return Files;
