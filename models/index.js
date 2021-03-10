@@ -4,7 +4,7 @@ const Sequelize = require("sequelize");
 const sequelize = new Sequelize(dbConfig.DB, dbConfig.USER, dbConfig.PASSWORD, {
     host: dbConfig.HOST,
     dialect: dbConfig.dialect,
-    operatorsAliases: false,
+    operatorsAliases: 0,
 
     pool: {
         max: dbConfig.pool.max,
@@ -18,9 +18,11 @@ const db = {};
 
 db.Sequelize = Sequelize;
 db.sequelize = sequelize;
-
+db.files = require("./files.model.js")(sequelize, Sequelize);
 db.users = require("./users.model.js")(sequelize, Sequelize);
 db.books = require("./books.model.js")(sequelize, Sequelize);
-db.file = require("./file.model.js")(sequelize, Sequelize);
+
+db.books.hasMany(db.files);
+db.files.belongsTo(db.books);
 
 module.exports = db;

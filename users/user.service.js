@@ -20,6 +20,7 @@ async function authenticate({ username, password }) {
     //, function (err, result) {
     if (result) {
         const { password, ...userWithoutPassword } = user.dataValues;
+
         return userWithoutPassword;
     }
     else {

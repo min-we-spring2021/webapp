@@ -18,10 +18,6 @@ module.exports = (sequelize, Sequelize) => {
         password: {
             type: Sequelize.STRING,
             allowNull: false
-            // validate: {
-            //     len: [9, 20],
-            //     is: /^[a-z]+[0-9]+$/i
-            // }
         },
         username: {
             type: Sequelize.STRING,
@@ -37,6 +33,8 @@ module.exports = (sequelize, Sequelize) => {
 
         }
 
+    }, {
+        // underscored: true
     });
 
     return Users;
