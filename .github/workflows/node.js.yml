@@ -30,6 +30,12 @@ jobs:
           mv ${{ env.ARTIFACT_NAME }} codedeploy_artifact/
           pwd
           ls -al 
+          cd codedeploy_artifact
+          pwd
+          ls -al
+          cd ..
+          pwd 
+          ls -al
 
 
       - name: configure aws credentials
@@ -41,7 +47,7 @@ jobs:
 
       - name: Copy files to S3
         run: |
-          aws s3 sync codedeploy_artifact s3://${{ secrets.S3_CODEDEPLOY_BUCKET }}
+          aws s3 sync ./codedeploy_artifact s3://${{ secrets.S3_CODEDEPLOY_BUCKET }}
 
       - name: codedeploy api call
         run: |
