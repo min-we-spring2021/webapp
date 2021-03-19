@@ -22,10 +22,9 @@ jobs:
 
       - name: build deployment Artifact
         run: |
-          pwd
-          ls -al
+          cd ..
           mkdir codedeploy_artifact
-          zip -r ${{ env.ARTIFACT_NAME }} app/*
+          zip -r ${{ env.ARTIFACT_NAME }} webapp/*
           pwd
           ls -al 
           mv ${{ env.ARTIFACT_NAME }} codedeploy_artifact
