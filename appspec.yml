@@ -6,7 +6,27 @@ files:
     destination: /home/ubuntu
 
 hooks:
-  AfterInstall:
-    - location: ./restartTomcat.sh
+  ApplicationStop:
+    - location: ./codedeploy/applicationStop.sh
       timeout: 180
-      runas: centos
+      runas: ubuntu
+
+  BeforeInstall:
+    - location: ./codedeploy/beforeInstall.sh
+      timeout: 180
+      runas: ubuntu
+
+  AfterInstall:
+    - location: ./codedeploy/restartTomcat.sh
+      timeout: 180
+      runas: ubuntu
+
+  ApplicationStart:
+    - location: ./codedeploy/applicationStart.sh
+      timeout: 180
+      runas: ubuntu
+
+  ValidateService:
+    - location: ./codedeploy/validateService.sh
+      timeout: 180
+      runas: ubuntu
