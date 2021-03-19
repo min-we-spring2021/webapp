@@ -22,8 +22,9 @@ jobs:
 
       - name: build deployment Artifact
         run: |
+          cd ..
           mkdir codedeploy_artifact
-          zip -r ${{ env.ARTIFACT_NAME }} codedeploy/*.sh appspec.yml
+          zip -r ${{ env.ARTIFACT_NAME }} app/*
           pwd
           ls -al 
           mv ${{ env.ARTIFACT_NAME }} codedeploy_artifact
