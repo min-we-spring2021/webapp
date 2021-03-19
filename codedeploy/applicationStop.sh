@@ -1,6 +1,4 @@
 #!/bin/bash
 
 
-if pgrep node
-then pkill node
-fi
+killall node || echo "Process was not running."
