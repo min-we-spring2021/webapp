@@ -2,7 +2,7 @@
 
 
 
-if pgrep node >/dev/null 2>&1
+if pgrep -x "node" >/dev/null 2>&1
   then
      sudo pkill node
   else
