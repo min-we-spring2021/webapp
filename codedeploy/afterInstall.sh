@@ -1,6 +1,5 @@
 #!/bin/bash
-
-pwd
-ls -a
+cd /
+cd /home/ubuntu
 sudo npm install
 

@@ -1,4 +1,5 @@
 #!/bin/bash
-pwd
-ls -a
+
+cd /
+cd /home/ubuntu
 sudo node app.js
