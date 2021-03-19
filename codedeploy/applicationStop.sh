@@ -1,4 +1,9 @@
 #!/bin/bash
 
 
-killall node || echo "Process was not running."
+if pgrep node
+then
+pkill node
+else
+echo " node is not running/stopped "
+fi
