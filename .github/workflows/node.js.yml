@@ -27,7 +27,7 @@ jobs:
           zip -r ${{ env.ARTIFACT_NAME }} webapp/*
           pwd
           ls -al 
-          mv ${{ env.ARTIFACT_NAME }} codedeploy_artifact
+          mv ${{ env.ARTIFACT_NAME }} codedeploy_artifact/
           pwd
           ls -al 
 
