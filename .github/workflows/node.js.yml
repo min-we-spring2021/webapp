@@ -30,9 +30,7 @@ jobs:
           mv ${{ env.ARTIFACT_NAME }} codedeploy_artifact
           pwd
           ls -al 
-          cd .. 
-          pwd 
-          ls -al
+
 
       - name: configure aws credentials
         uses: aws-actions/configure-aws-credentials@v1
