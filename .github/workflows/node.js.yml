@@ -47,6 +47,7 @@ jobs:
 
       - name: Copy files to S3
         run: |
+          cd ..
           pwd
           ls -al
           aws s3 sync ./codedeploy_artifact s3://${{ secrets.S3_CODEDEPLOY_BUCKET }}
