@@ -128,7 +128,7 @@ app.delete('/books/:id', express.json(), basicAuth, (req, res) => {
             });
         });
 });
-app.get("/books", async (req, res) => {
+app.get("/mybooks", async (req, res) => {
     await books.findAll({
         include: [
             {
