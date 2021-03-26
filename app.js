@@ -17,6 +17,7 @@ const validPW = require('./_helpers/validPW');
 const isUniqueFileName = require('./_helpers/isUniqueFileName');
 const fileUpload = require('express-fileupload');
 const path = require('path');
+const StatsD = require('node-statsd')
 client = new StatsD({
     host: 'localhost',
     port: 8125
