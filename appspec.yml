@@ -4,6 +4,8 @@ os: linux
 files:
   - source: /
     destination: /home/ubuntu
+  - source: cloudwatch-config.json
+    destination: /opt
 
 hooks:
   ApplicationStop:
