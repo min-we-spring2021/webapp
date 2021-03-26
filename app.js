@@ -56,6 +56,7 @@ app.get("/v1/user/self", express.json(), (req, res) => {
 app.put('/v1/user/self', express.json(), (req, res) => {
 })
 app.post('/v1/user', express.json(), async (req, res) => {
+    client.increment('addAUser.counter');
     const { first_name, last_name, password, email } = req.body;
     const uid = uuidv4();
     if (!validPW(password)) {
@@ -89,6 +90,7 @@ app.post('/v1/user', express.json(), async (req, res) => {
     });
 })
 app.post("/books", express.json(), basicAuth, (req, res) => {
+    client.increment('addABook.counter');
     const { title, author, isbn, published_date } = req.body;
     const user_id = req.user.id;
     const uid = uuidv4();
@@ -112,12 +114,15 @@ app.post("/books", express.json(), basicAuth, (req, res) => {
         });
 });
 app.delete('/books/:id', express.json(), basicAuth, (req, res) => {
+    client.increment('deleteABook.counter');
+    const timer = new Date();
     const id = req.params.id;
     books.destroy({
         where: { id: id }
     })
         .then(num => {
             if (num == 1) {
+                client.timing('mybooks.timer', timer)
                 res.status(200).send({
                     message: "The book was deleted successfully!"
                 });
@@ -134,7 +139,8 @@ app.delete('/books/:id', express.json(), basicAuth, (req, res) => {
         });
 });
 app.get("/mybooks", async (req, res) => {
-    client.increment('mybooks');
+    client.increment('mybooks.counter');
+    const timer = new Date();
     await books.findAll({
         include: [
             {
@@ -170,6 +176,7 @@ app.get("/mybooks", async (req, res) => {
                     }
                 )
             })
+            client.timing('mybooks.timer', timer)
             res.status(200).send(resObj);
         })
         .catch(err => {
@@ -180,6 +187,7 @@ app.get("/mybooks", async (req, res) => {
         });
 });
 app.get("/books/:id", async (req, res) => {
+    client.increment('getABook.counter');
     const id = req.params.id;
     await books.findAll({
         include: [
@@ -226,6 +234,7 @@ app.get("/books/:id", async (req, res) => {
         });
 });
 app.delete('/books/:book_id/image/:image_id', express.json(), basicAuth, (req, res) => {
+    client.increment('deleteImage.counter');
     const image_id = req.params.image_id;
     const params = {
         Bucket: process.env.Bucket || "webapp-wenhao-min",
@@ -256,6 +265,7 @@ app.delete('/books/:book_id/image/:image_id', express.json(), basicAuth, (req, r
         });
 });
 app.post('/books/:book_id/image', express.json(), basicAuth, (req, res) => {
+    client.increment('postBookImage.counter');
     const bookId = req.params.book_id;
     const user_id = req.user.id;
     const imageId = uuidv4();

@@ -9,6 +9,7 @@ router.put('/', authenticateAndUpdate);
 module.exports = router;
 
 function authenticate(req, res, next) {
+    client.increment('getUser.counter');
     const base64Credentials = req.headers.authorization.split(' ')[1];
     const credentials = Buffer.from(base64Credentials, 'base64').toString('ascii');
     const [username, password] = credentials.split(':');
@@ -19,7 +20,7 @@ function authenticate(req, res, next) {
         .catch(err => next(err));
 }
 function authenticateAndUpdate(req, res, next) {
-
+    client.increment('updateUser.counter');
     const base64Credentials = req.headers.authorization.split(' ')[1];
     const credentials = Buffer.from(base64Credentials, 'base64').toString('ascii');
     const [username, password] = credentials.split(':');
