@@ -62,6 +62,7 @@ app.get("/v1/user/self", express.json(), (req, res) => {
 app.put('/v1/user/self', express.json(), (req, res) => {
 })
 app.post('/v1/user', express.json(), async (req, res) => {
+    const timer = new Date();
     client.increment('addAUser.counter');
     const { first_name, last_name, password, email } = req.body;
     const uid = uuidv4();
@@ -82,6 +83,7 @@ app.post('/v1/user', express.json(), async (req, res) => {
         if (isUnique) {
             users.create(newUser)
                 .then(data => {
+                    client.timing('addAUser.timer', timer)
                     res.status(200).json({ message: "you have create a new user." });
                 })
                 .catch(err => {
@@ -97,6 +99,7 @@ app.post('/v1/user', express.json(), async (req, res) => {
 })
 app.post("/books", express.json(), basicAuth, (req, res) => {
     client.increment('addABook.counter');
+    const timer = new Date();
     const { title, author, isbn, published_date } = req.body;
     const user_id = req.user.id;
     const uid = uuidv4();
@@ -110,6 +113,7 @@ app.post("/books", express.json(), basicAuth, (req, res) => {
         book_created: new Date()
     }
     books.create(newBook).then(data => {
+        client.timing('addABook.timer', timer)
         res.status(200).json(newBook)
     })
         .catch(err => {
@@ -128,7 +132,7 @@ app.delete('/books/:id', express.json(), basicAuth, (req, res) => {
     })
         .then(num => {
             if (num == 1) {
-                client.timing('mybooks.timer', timer)
+                client.timing('deleteABook.timer', timer)
                 res.status(200).send({
                     message: "The book was deleted successfully!"
                 });
@@ -194,6 +198,7 @@ app.get("/mybooks", async (req, res) => {
 });
 app.get("/books/:id", async (req, res) => {
     client.increment('getABook.counter');
+    const timer = new Date();
     const id = req.params.id;
     await books.findAll({
         include: [
@@ -230,6 +235,7 @@ app.get("/books/:id", async (req, res) => {
                     }
                 )
             })
+            client.timing('getABook.timer', timer)
             res.status(200).send(resObj.find(book => book.id == id));
         })
         .catch(err => {
@@ -241,6 +247,7 @@ app.get("/books/:id", async (req, res) => {
 });
 app.delete('/books/:book_id/image/:image_id', express.json(), basicAuth, (req, res) => {
     client.increment('deleteImage.counter');
+    const timer = new Date();
     const image_id = req.params.image_id;
     const params = {
         Bucket: process.env.Bucket || "webapp-wenhao-min",
@@ -251,11 +258,14 @@ app.delete('/books/:book_id/image/:image_id', express.json(), basicAuth, (req, r
     })
         .then(num => {
             if (num == 1) {
+                const timer2 = new Date();
                 s3.deleteObject(params, function (err, data) {
                     if (err) {
                         res.status(400).send("you have delete mateData in mysql,but has some err while delete in S3" + err);
                         throw err;
                     }
+                    client.timing('deleteImage.timer', timer)
+                    client.timing('deleteImage.timer', timer2)
                     res.status(200).send({ message: "The file was deleted successfully!" })
                 })
             } else {
@@ -272,6 +282,8 @@ app.delete('/books/:book_id/image/:image_id', express.json(), basicAuth, (req, r
 });
 app.post('/books/:book_id/image', express.json(), basicAuth, (req, res) => {
     client.increment('postBookImage.counter');
+    const timer = new Date();
+
     const bookId = req.params.book_id;
     const user_id = req.user.id;
     const imageId = uuidv4();
@@ -299,11 +311,14 @@ app.post('/books/:book_id/image', express.json(), basicAuth, (req, res) => {
         if (isUnique) {
             files.create(file)
                 .then(data => {
+                    const timer2 = new Date();
                     s3.upload(params, function (err, data) {
                         if (err) {
                             res.status(400).send("you have save mateData in mysql,but has some err while upload to S3" + err);
                             throw err;
                         }
+                        client.timing('postBookImage.timer', timer)
+                        client.timing('postBookImage.timer', timer2)
                         res.status(200).json(file)
                     });
                 })
@@ -327,3 +342,4 @@ app.post('/books/:book_id/image', express.json(), basicAuth, (req, res) => {
 
 
 app.listen(PORT, () => console.log(`listening on http://localhost:${PORT}`));
+
