@@ -22,9 +22,7 @@ client = new StatsD({
     host: 'localhost',
     port: 8125
 });
-const timer = new Date();
 
-client.timing('some.timer', timer);
 const aws = require("aws-sdk");
 // aws.config.update({
 //     accessKeyId: process.env.accessKeyId,
