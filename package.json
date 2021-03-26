@@ -25,6 +25,7 @@
     "mysql2": "^2.2.5",
     "node-statsd": "^0.1.1",
     "path": "^0.12.7",
-    "sequelize": "^6.5.0"
+    "sequelize": "^6.5.0",
+    "statsd-client": "^0.4.5"
   }
 }
