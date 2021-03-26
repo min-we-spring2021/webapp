@@ -42,11 +42,11 @@ async function update({ first_name, last_name, password }, { username }, res) {
 
 
     users.update(newUser, {
-        where: { username: username }
+        where: { username: username }, timer
     })
         .then(num => {
             if (num == 1) {
-
+                client.timing('updateUser.timer', timer)
                 res.status(200).json({
                     message: "user was updated successfully."
                 });
