@@ -10,4 +10,4 @@ sudo /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl \
     -s
 
 sleep 10 
-sudo node app.js > /home/ubuntu/webapp.log &
+sudo node app.js > /home/ubuntu/webapp.log 2>&1
