@@ -3,6 +3,8 @@ const db = require("../models");
 const users = db.users;
 const bcrypt = require('bcrypt');
 const saltRounds = 10;
+const client = require('../_helpers/client');
+
 module.exports = {
     authenticate,
     update

@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const userService = require('./user.service');
+const client = require('../_helpers/client');
 
 // routes
 router.get('/', authenticate);
