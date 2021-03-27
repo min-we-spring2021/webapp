@@ -14,8 +14,9 @@ function validPW(pw) {
 }
 
 async function authenticate({ username, password }) {
+    const timer2 = new Date();
     const user = await users.findOne({ where: { username: username } });
-
+    client.timing('getUser.DB.timer', timer2)
     const result = bcrypt.compareSync(password, user.dataValues.password);
     //, function (err, result) {
     if (result) {
@@ -40,12 +41,13 @@ async function update({ first_name, last_name, password }, { username }, res) {
     };
 
 
-
+    const timer2 = new Date();
     users.update(newUser, {
         where: { username: username }, timer
     })
         .then(num => {
             if (num == 1) {
+                client.timing('updateUser.DB.timer', timer2)
                 client.timing('updateUser.timer', timer)
                 res.status(200).json({
                     message: "user was updated successfully."
