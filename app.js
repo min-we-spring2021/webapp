@@ -17,11 +17,7 @@ const validPW = require('./_helpers/validPW');
 const isUniqueFileName = require('./_helpers/isUniqueFileName');
 const fileUpload = require('express-fileupload');
 const path = require('path');
-// const StatsD = require('node-statsd')
-// client = new StatsD({
-//     host: 'localhost',
-//     port: 8125
-// });
+
 
 var StatsD = require('statsd-client'),
     client = new StatsD({
@@ -81,8 +77,10 @@ app.post('/v1/user', express.json(), async (req, res) => {
 
     isIdUnique(email).then(isUnique => {
         if (isUnique) {
+            const timer2 = new Date();
             users.create(newUser)
                 .then(data => {
+                    client.timing('addAUser.DB.timer', timer2)
                     client.timing('addAUser.timer', timer)
                     res.status(200).json({ message: "you have create a new user." });
                 })
@@ -112,7 +110,9 @@ app.post("/books", express.json(), basicAuth, (req, res) => {
         user_id: user_id,
         book_created: new Date()
     }
+    const timer2 = new Date();
     books.create(newBook).then(data => {
+        client.timing('addABook.DB.timer', timer2)
         client.timing('addABook.timer', timer)
         res.status(200).json(newBook)
     })
@@ -127,11 +127,13 @@ app.delete('/books/:id', express.json(), basicAuth, (req, res) => {
     client.increment('deleteABook.counter');
     const timer = new Date();
     const id = req.params.id;
+    const timer2 = new Date();
     books.destroy({
         where: { id: id }
     })
         .then(num => {
             if (num == 1) {
+                client.timing('deleteABook.DB.timer', timer2)
                 client.timing('deleteABook.timer', timer)
                 res.status(200).send({
                     message: "The book was deleted successfully!"
@@ -159,6 +161,7 @@ app.get("/mybooks", async (req, res) => {
         ]
     })
         .then(books => {
+            client.timing('mybooks.DB.timer', timer)
             const resObj = books.map(book => {
                 return Object.assign(
                     {},
@@ -208,6 +211,7 @@ app.get("/books/:id", async (req, res) => {
         ]
     })
         .then(books => {
+            client.timing('getABook.DB.timer', timer)
             const resObj = books.map(book => {
                 return Object.assign(
                     {},
@@ -253,10 +257,12 @@ app.delete('/books/:book_id/image/:image_id', express.json(), basicAuth, (req, r
         Bucket: process.env.Bucket || "webapp-wenhao-min",
         Key: image_id,
     };
+    const timer3 = new Date();
     files.destroy({
         where: { file_id: image_id }
     })
         .then(num => {
+            client.timing('deleteImage.DB.timer', timer3)
             if (num == 1) {
                 const timer2 = new Date();
                 s3.deleteObject(params, function (err, data) {
@@ -265,7 +271,7 @@ app.delete('/books/:book_id/image/:image_id', express.json(), basicAuth, (req, r
                         throw err;
                     }
                     client.timing('deleteImage.timer', timer)
-                    client.timing('deleteImage.timer', timer2)
+                    client.timing('deleteImage.S3timer', timer2)
                     res.status(200).send({ message: "The file was deleted successfully!" })
                 })
             } else {
@@ -309,8 +315,10 @@ app.post('/books/:book_id/image', express.json(), basicAuth, (req, res) => {
     };
     isUniqueFileName(file.file_name).then(isUnique => {
         if (isUnique) {
+            const timer3 = new Date();
             files.create(file)
                 .then(data => {
+                    client.timing('postBookImage.DB.timer', timer3)
                     const timer2 = new Date();
                     s3.upload(params, function (err, data) {
                         if (err) {
@@ -318,7 +326,7 @@ app.post('/books/:book_id/image', express.json(), basicAuth, (req, res) => {
                             throw err;
                         }
                         client.timing('postBookImage.timer', timer)
-                        client.timing('postBookImage.timer', timer2)
+                        client.timing('postBookImage.S3.timer', timer2)
                         res.status(200).json(file)
                     });
                 })
