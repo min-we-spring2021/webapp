@@ -17,13 +17,13 @@ const validPW = require('./_helpers/validPW');
 const isUniqueFileName = require('./_helpers/isUniqueFileName');
 const fileUpload = require('express-fileupload');
 const path = require('path');
+const client = require('./_helpers/client');
+// const StatsD = require('statsd-client');
 
-
-var StatsD = require('statsd-client'),
-    client = new StatsD({
-        host: 'localhost',
-        port: 8125
-    });
+// const client = new StatsD({
+//     host: 'localhost',
+//     port: 8125
+// });
 
 const aws = require("aws-sdk");
 // aws.config.update({
