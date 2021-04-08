@@ -18,18 +18,15 @@ const isUniqueFileName = require('./_helpers/isUniqueFileName');
 const fileUpload = require('express-fileupload');
 const path = require('path');
 const client = require('./_helpers/client');
-// const StatsD = require('statsd-client');
 
-// const client = new StatsD({
-//     host: 'localhost',
-//     port: 8125
-// });
 
 const aws = require("aws-sdk");
+const { propfind } = require('./users/users.controller');
 // aws.config.update({
 //     accessKeyId: process.env.accessKeyId,
 //     secretAccessKey: process.env.secretAccessKey
 // });
+aws.config.update({ region: 'us-east-1' });
 const s3 = new aws.S3();
 
 
@@ -111,9 +108,22 @@ app.post("/books", express.json(), basicAuth, (req, res) => {
         book_created: new Date()
     }
     const timer2 = new Date();
+    const topics = {
+        Message: `BookID: ${uid},user's email: ${req.user.username},link: prod.wenhaom.me/books/${uid}`,
+        TopicArn: 'arn:aws:sns:us-east-1:231232113671:topic'
+    };
     books.create(newBook).then(data => {
         client.timing('addABook.DB.timer', timer2)
         client.timing('addABook.timer', timer)
+        const publishTextPromise = new aws.SNS({ apiVersion: '2010-03-31' }).publish(topics).promise();
+        publishTextPromise.then(
+            function (data) {
+                console.log(`Message ${topics.Message} sent to the topic ${topics.TopicArn}`);
+                console.log("MessageID is " + data.MessageId);
+            }).catch(
+                function (err) {
+                    console.error(err, err.stack);
+                });
         res.status(200).json(newBook)
     })
         .catch(err => {
@@ -128,6 +138,11 @@ app.delete('/books/:id', express.json(), basicAuth, (req, res) => {
     const timer = new Date();
     const id = req.params.id;
     const timer2 = new Date();
+    const topics = {
+        Message: `BookID: ${id},user's email: ${req.user.username}`,
+        TopicArn: 'arn:aws:sns:us-east-1:231232113671:topic'
+
+    };
     books.destroy({
         where: { id: id }
     })
@@ -135,6 +150,15 @@ app.delete('/books/:id', express.json(), basicAuth, (req, res) => {
             if (num == 1) {
                 client.timing('deleteABook.DB.timer', timer2)
                 client.timing('deleteABook.timer', timer)
+                const publishTextPromise = new aws.SNS({ apiVersion: '2010-03-31' }).publish(topics).promise();
+                publishTextPromise.then(
+                    function (data) {
+                        console.log(`Message ${topics.Message} sent to the topic ${topics.TopicArn}`);
+                        console.log("MessageID is " + data.MessageId);
+                    }).catch(
+                        function (err) {
+                            console.error(err, err.stack);
+                        });
                 res.status(200).send({
                     message: "The book was deleted successfully!"
                 });
