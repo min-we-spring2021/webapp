@@ -26,6 +26,7 @@ const { propfind } = require('./users/users.controller');
 //     accessKeyId: process.env.accessKeyId,
 //     secretAccessKey: process.env.secretAccessKey
 // });
+aws.config.update({ region: 'us-east-1' });
 const s3 = new aws.S3();
 
 
@@ -108,17 +109,13 @@ app.post("/books", express.json(), basicAuth, (req, res) => {
     }
     const timer2 = new Date();
     const topics = {
-        Message: {
-            "BookID": uid,
-            "user's email": req.user.username,
-            "link": "prod.wenhaom.me/books/" + uid
-        },
+        Message: `BookID: ${uid},user's email: ${req.user.username},link: prod.wenhaom.me/books/${uid}`,
         TopicArn: 'arn:aws:sns:us-east-1:231232113671:topic'
     };
     books.create(newBook).then(data => {
         client.timing('addABook.DB.timer', timer2)
         client.timing('addABook.timer', timer)
-        const publishTextPromise = AWS.SNS({ apiVersion: '2010-03-31' }).publish(topics).promise();
+        const publishTextPromise = new aws.SNS({ apiVersion: '2010-03-31' }).publish(topics).promise();
         publishTextPromise.then(
             function (data) {
                 console.log(`Message ${topics.Message} sent to the topic ${topics.TopicArn}`);
@@ -142,11 +139,9 @@ app.delete('/books/:id', express.json(), basicAuth, (req, res) => {
     const id = req.params.id;
     const timer2 = new Date();
     const topics = {
-        Message: {
-            "BookID": uid,
-            "user's email": req.user.username
-        },
+        Message: `BookID: ${id},user's email: ${req.user.username}`,
         TopicArn: 'arn:aws:sns:us-east-1:231232113671:topic'
+
     };
     books.destroy({
         where: { id: id }
@@ -155,7 +150,7 @@ app.delete('/books/:id', express.json(), basicAuth, (req, res) => {
             if (num == 1) {
                 client.timing('deleteABook.DB.timer', timer2)
                 client.timing('deleteABook.timer', timer)
-                const publishTextPromise = AWS.SNS({ apiVersion: '2010-03-31' }).publish(topics).promise();
+                const publishTextPromise = new aws.SNS({ apiVersion: '2010-03-31' }).publish(topics).promise();
                 publishTextPromise.then(
                     function (data) {
                         console.log(`Message ${topics.Message} sent to the topic ${topics.TopicArn}`);
