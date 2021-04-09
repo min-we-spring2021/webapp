@@ -79,7 +79,7 @@ app.post('/v1/user', express.json(), async (req, res) => {
                 .then(data => {
                     client.timing('addAUser.DB.timer', timer2)
                     client.timing('addAUser.timer', timer)
-                    res.status(200).json({ message: "you have create a new user." });
+                    res.status(200).json(newUser);
                 })
                 .catch(err => {
                     res.status(500).json({
@@ -107,9 +107,15 @@ app.post("/books", express.json(), basicAuth, (req, res) => {
         user_id: user_id,
         book_created: new Date()
     }
+    const message = {
+        "type": "create",
+        "BookID": uid,
+        "email": req.user.username,
+        "link": "prod.wenhaom.me/books/" + uid
+    }
     const timer2 = new Date();
     const topics = {
-        Message: `BookID: ${uid},user's email: ${req.user.username},link: prod.wenhaom.me/books/${uid}`,
+        Message: JSON.stringify(message),
         TopicArn: 'arn:aws:sns:us-east-1:231232113671:topic'
     };
     books.create(newBook).then(data => {
@@ -118,18 +124,20 @@ app.post("/books", express.json(), basicAuth, (req, res) => {
         const publishTextPromise = new aws.SNS({ apiVersion: '2010-03-31' }).publish(topics).promise();
         publishTextPromise.then(
             function (data) {
-                console.log(`Message ${topics.Message} sent to the topic ${topics.TopicArn}`);
-                console.log("MessageID is " + data.MessageId);
+                res.status(200).json(newBook);
             }).catch(
                 function (err) {
-                    console.error(err, err.stack);
+                    res.status(204).json({
+                        message:
+                            err.message || "create book success,but did not send a confirm email"
+                    });
                 });
-        res.status(200).json(newBook)
+        //res.status(200).json(newBook)
     })
         .catch(err => {
             res.status(500).json({
                 message:
-                    err.message || "Some error occurred while creating the user."
+                    err.message || "Some error occurred while creating the book."
             });
         });
 });
@@ -138,8 +146,13 @@ app.delete('/books/:id', express.json(), basicAuth, (req, res) => {
     const timer = new Date();
     const id = req.params.id;
     const timer2 = new Date();
+    const message = {
+        "type": "delete",
+        "BookID": id,
+        "email": req.user.username
+    }
     const topics = {
-        Message: `BookID: ${id},user's email: ${req.user.username}`,
+        Message: JSON.stringify(message),
         TopicArn: 'arn:aws:sns:us-east-1:231232113671:topic'
 
     };
@@ -153,15 +166,16 @@ app.delete('/books/:id', express.json(), basicAuth, (req, res) => {
                 const publishTextPromise = new aws.SNS({ apiVersion: '2010-03-31' }).publish(topics).promise();
                 publishTextPromise.then(
                     function (data) {
-                        console.log(`Message ${topics.Message} sent to the topic ${topics.TopicArn}`);
-                        console.log("MessageID is " + data.MessageId);
+                        res.status(200).send({
+                            message: "The book was deleted successfully!"
+                        });
                     }).catch(
                         function (err) {
-                            console.error(err, err.stack);
+                            res.send({
+                                message: "delete success, but could not send email"
+                            });
                         });
-                res.status(200).send({
-                    message: "The book was deleted successfully!"
-                });
+
             } else {
                 res.send({
                     message: `Cannot delete book with id=${id}. Maybe book was not found!`
