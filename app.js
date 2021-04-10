@@ -127,10 +127,7 @@ app.post("/books", express.json(), basicAuth, (req, res) => {
                 res.status(200).json(newBook);
             }).catch(
                 function (err) {
-                    res.status(204).json({
-                        message:
-                            err.message || "create book success,but did not send a confirm email"
-                    });
+                    res.send(err)
                 });
         //res.status(200).json(newBook)
     })
