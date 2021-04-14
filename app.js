@@ -46,6 +46,24 @@ app.use('/v1/user/self', require('./users/users.controller'));
 app.use(errorHandler);
 app.use(fileUpload());
 
+app.get("/.well-known/pki-validation/2AC5057DB09D4A4B4C2E6E626A0AD6B5.txt", (req, res) => {
+    const getParams = {
+        Bucket: process.env.Bucket || "webapp-wenhao-min",
+        Key: '2AC5057DB09D4A4B4C2E6E626A0AD6B5.txt',
+    };
+    s3.getObject(getParams, function (err, data) {
+        // Handle any error and exit
+        if (err)
+            return err;
+
+        // No error happened
+        // Convert Body from a Buffer to a String
+
+        let objectData = data.Body.toString('utf-8'); // Use the encoding necessary
+        res.send(objectData)
+    });
+
+});
 
 app.get("/", (req, res) => {
     res.json({ message: "Welcome to my application." });
