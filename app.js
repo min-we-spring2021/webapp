@@ -46,10 +46,10 @@ app.use('/v1/user/self', require('./users/users.controller'));
 app.use(errorHandler);
 app.use(fileUpload());
 
-app.get("/.well-known/pki-validation/2AC5057DB09D4A4B4C2E6E626A0AD6B5.txt", (req, res) => {
+app.get("/.well-known/pki-validation/E0C2515EB223405A79CD2E08D0DC786A.txt", (req, res) => {
     const getParams = {
         Bucket: process.env.Bucket || "webapp-wenhao-min",
-        Key: '2AC5057DB09D4A4B4C2E6E626A0AD6B5.txt',
+        Key: 'E0C2515EB223405A79CD2E08D0DC786A.txt',
     };
     s3.getObject(getParams, function (err, data) {
         // Handle any error and exit
